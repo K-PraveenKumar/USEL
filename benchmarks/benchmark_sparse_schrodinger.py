@@ -27,7 +27,7 @@ from typing import Any, Callable
 import numpy as np
 import scipy
 from scipy.linalg import lu_factor, lu_solve
-from scipy.sparse import csc_matrix, diags, eye
+from scipy.sparse import diags, eye
 from scipy.sparse.linalg import splu
 
 
@@ -50,7 +50,7 @@ def run_dense(
     dt: float,
 ) -> tuple[np.ndarray, int]:
     """Run dense Crank–Nicolson propagation and return state and storage."""
-    x, potential, psi, dx = initial_problem(n)
+    _, potential, psi, dx = initial_problem(n)
 
     hbar = 1.0
     mass = 1.0
@@ -98,7 +98,7 @@ def run_sparse(
     dt: float,
 ) -> tuple[np.ndarray, int]:
     """Run sparse Crank–Nicolson propagation and return state and storage."""
-    x, potential, psi, dx = initial_problem(n)
+    _, potential, psi, dx = initial_problem(n)
 
     hbar = 1.0
     mass = 1.0
