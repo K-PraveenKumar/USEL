@@ -234,9 +234,7 @@ class SchrodingerSolver:
         try:
             A_lu = splu(A)
         except Exception as exc:
-            raise SolverError(
-                f"Crank–Nicolson sparse factorization failed: {exc}"
-            ) from exc
+            raise SolverError(f"Crank–Nicolson sparse factorization failed: {exc}") from exc
 
         psi = psi0.astype(np.complex128).copy()
 

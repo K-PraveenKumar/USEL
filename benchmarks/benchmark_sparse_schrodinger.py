@@ -21,8 +21,9 @@ import statistics
 import sys
 import time
 import tracemalloc
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 import numpy as np
 import scipy
@@ -172,13 +173,9 @@ def measure(
     return {
         "median_runtime_seconds": statistics.median(runtimes),
         "min_runtime_seconds": min(runtimes),
-        "runtime_stdev_seconds": (
-            statistics.stdev(runtimes) if len(runtimes) > 1 else 0.0
-        ),
+        "runtime_stdev_seconds": (statistics.stdev(runtimes) if len(runtimes) > 1 else 0.0),
         "median_traced_peak_bytes": int(statistics.median(peak_memories)),
-        "median_matrix_payload_bytes": int(
-            statistics.median(matrix_payloads)
-        ),
+        "median_matrix_payload_bytes": int(statistics.median(matrix_payloads)),
         "repeats": repeats,
         "_final_state": final_state,
     }
@@ -261,9 +258,7 @@ def main() -> None:
 
         dx = 16.0 / (n - 1)
 
-        max_abs_difference = float(
-            np.max(np.abs(dense_state - sparse_state))
-        )
+        max_abs_difference = float(np.max(np.abs(dense_state - sparse_state)))
         final_states_allclose = bool(
             np.allclose(
                 dense_state,
@@ -273,12 +268,8 @@ def main() -> None:
             )
         )
 
-        dense_norm = float(
-            np.sqrt(np.sum(np.abs(dense_state) ** 2) * dx)
-        )
-        sparse_norm = float(
-            np.sqrt(np.sum(np.abs(sparse_state) ** 2) * dx)
-        )
+        dense_norm = float(np.sqrt(np.sum(np.abs(dense_state) ** 2) * dx))
+        sparse_norm = float(np.sqrt(np.sum(np.abs(sparse_state) ** 2) * dx))
 
         norms_conserved = bool(
             np.isclose(dense_norm, 1.0, rtol=1e-8, atol=1e-10)
@@ -288,11 +279,7 @@ def main() -> None:
         dense_runtime = dense["median_runtime_seconds"]
         sparse_runtime = sparse["median_runtime_seconds"]
 
-        speedup = (
-            float(dense_runtime / sparse_runtime)
-            if sparse_runtime > 0
-            else None
-        )
+        speedup = float(dense_runtime / sparse_runtime) if sparse_runtime > 0 else None
 
         results.append(
             {
@@ -343,28 +330,21 @@ def main() -> None:
             "repeats": args.repeats,
             "grid_sizes": args.sizes,
             "timing_statistic": "median",
-            "memory_measurement": (
-                "tracemalloc peak; Python-traced allocations only"
-            ),
+            "memory_measurement": ("tracemalloc peak; Python-traced allocations only"),
             "matrix_storage_estimate": (
                 "Principal matrix and factor payloads; excludes Python "
                 "object overhead and temporary allocations"
             ),
-            "normalization": (
-                "Discrete physical norm: sqrt(sum(abs(psi)**2) * dx)"
-            ),
+            "normalization": ("Discrete physical norm: sqrt(sum(abs(psi)**2) * dx)"),
         },
         "results": results,
     }
 
     if not all(
-        item["correctness"]["final_states_allclose"]
-        and item["correctness"]["norms_conserved"]
+        item["correctness"]["final_states_allclose"] and item["correctness"]["norms_conserved"]
         for item in results
     ):
-        raise SystemExit(
-            "Dense/sparse agreement or norm-conservation validation failed"
-        )
+        raise SystemExit("Dense/sparse agreement or norm-conservation validation failed")
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(
